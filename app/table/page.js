@@ -3338,6 +3338,446 @@
 // export default DynamicTable;
 
 // test 24 besttttttttttttttttttttt           sucessssssssssssssssssssssssss finalllllllllllllllllllllllllll
+// import React, { useState, useEffect } from "react";
+
+// const DynamicTable = () => {
+//   const [data, setData] = useState([]);
+//   const [error, setError] = useState(null);
+//   const [productGroupIDsByCategory, setProductGroupIDsByCategory] = useState(
+//     {}
+//   );
+
+//   useEffect(() => {
+//     fetchData();
+//   }, []);
+
+//   const fetchData = async () => {
+//     try {
+//       const response = await fetch(
+//         "http://localhost:3500/table/getQueryData?database=DataBase1&tables=FY20_Table1&valueColumns=revenue%2Cweight&rows=zone%2Cregion&groupByFields=customer_category%2CProduct_Group_ID",
+//         {
+//           method: "POST",
+//           headers: {
+//             "Content-Type": "application/json",
+//             Authorization:
+//               "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6Im1vaGl0MTIzIiwicm9sZXMiOlsyMDAxLDE5ODRdfSwiaWF0IjoxNzEzMTc1MzQ1LCJleHAiOjE3MTMyNzUzNDV9.vhWJ32EfSryfkAk4mZv8hH2f2DmWbaVYc_fEzlKYSsQ",
+//             Cookie:
+//               "jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6Im1vaGl0MTIzIiwicm9sZXMiOlsyMDAxLDE5ODRdfSwiaWF0IjoxNzEzMTc1MzQ1LCJleHAiOjE3MTMyNzUzNDV9.vhWJ32EfSryfkAk4mZv8hH2f2DmWbaVYc_fEzlKYSsQ",
+//           },
+//           body: JSON.stringify({
+//             mongoId: "660bc6abb6a9151ea1faa14b",
+//           }),
+//         }
+//       );
+
+//       const result = await response.json();
+//       console.log(result);
+//       setData(result);
+//       setError(null);
+
+//       // Group data by customer category and product group ID to get unique product group IDs for each customer category
+//       const groupedProductGroupIDs = result.reduce((acc, curr) => {
+//         const { customer_category, Product_Group_ID } = curr;
+//         if (!acc[customer_category]) {
+//           acc[customer_category] = new Set();
+//         }
+//         acc[customer_category].add(Product_Group_ID);
+//         return acc;
+//       }, {});
+
+//       // Convert the sets of product group IDs to arrays
+//       const productGroupIDsByCategory = {};
+//       for (const category in groupedProductGroupIDs) {
+//         productGroupIDsByCategory[category] = Array.from(
+//           groupedProductGroupIDs[category]
+//         );
+//       }
+//       setProductGroupIDsByCategory(productGroupIDsByCategory);
+//     } catch (error) {
+//       console.error("Error fetching data:", error);
+//       setError("Error fetching data. Please try again later.");
+//     }
+//   };
+
+//   if (error) {
+//     return (
+//       <div className="min-h-screen flex justify-center items-center">
+//         <p className="text-red-500">{error}</p>
+//       </div>
+//     );
+//   }
+
+//   if (!Array.isArray(data) || data.length === 0) {
+//     return (
+//       <div className="min-h-screen flex justify-center items-center">
+//         <p>No data available.</p>
+//       </div>
+//     );
+//   }
+
+//   const categories = Object.keys(productGroupIDsByCategory);
+
+//   // Group data by zone and region
+//   const groupedData = data.reduce((acc, curr) => {
+//     const { zone, region, Product_Group_ID } = curr;
+//     if (!acc[zone]) {
+//       acc[zone] = {};
+//     }
+//     if (!acc[zone][region]) {
+//       acc[zone][region] = [];
+//     }
+//     if (!acc[zone][region].includes(Product_Group_ID)) {
+//       acc[zone][region].push(Product_Group_ID);
+//     }
+//     return acc;
+//   }, {});
+//   // Calculate the maximum number of product group IDs among all categories
+//   const maxProductGroupIDs = Math.max(
+//     ...categories.map((category) => productGroupIDsByCategory[category].length)
+//   );
+
+//   // Render the table
+//   return (
+//     <div className="min-h-screen">
+//       <div className="ml-5 mt-5">
+//         <h2>Dynamic Pivot Table</h2>
+//         <table className="border-collapse border border-gray-500 w-full">
+//           <thead>
+//             <tr>
+//               <th rowSpan="2" className="border border-gray-500 px-4 py-2">
+//                 Zone
+//               </th>
+//               <th rowSpan="2" className="border border-gray-500 px-4 py-2">
+//                 Region
+//               </th>
+//               {categories.map((category, index) => (
+//                 <React.Fragment key={index}>
+//                   <th
+//                     colSpan={productGroupIDsByCategory[category].length * 2}
+//                     className="border border-gray-500 px-4 py-2"
+//                   >
+//                     {category}
+//                   </th>
+//                 </React.Fragment>
+//               ))}
+//             </tr>
+//             <tr>
+//               {categories.map((category) =>
+//                 productGroupIDsByCategory[category].map((groupID, idx) => (
+//                   <React.Fragment key={idx}>
+//                     <th className="border border-gray-500 px-4 py-2">
+//                       {groupID} (revenue)
+//                     </th>
+//                     <th className="border border-gray-500 px-4 py-2">
+//                       {groupID} (weight)
+//                     </th>
+//                   </React.Fragment>
+//                 ))
+//               )}
+//             </tr>
+//           </thead>
+
+//           <tbody>
+//             {Object.entries(groupedData).map(([zone, regions], zoneIndex) =>
+//               Object.entries(regions).map(
+//                 ([region, productGroupIDs], rowIndex) => (
+//                   <tr key={`${zone}-${region}`}>
+//                     {rowIndex === 0 && (
+//                       <React.Fragment>
+//                         <td
+//                           rowSpan={Object.keys(regions).length}
+//                           className="border border-gray-500 px-4 py-2"
+//                         >
+//                           {zone}
+//                         </td>
+//                       </React.Fragment>
+//                     )}
+//                     <td className="border border-gray-500 px-4 py-2">
+//                       {region}
+//                     </td>
+//                     {categories.map((category, categoryIndex) => (
+//                       <React.Fragment
+//                         key={`${zone}-${region}-${categoryIndex}`}
+//                       >
+//                         {productGroupIDsByCategory[category].map(
+//                           (groupID, groupIndex) => (
+//                             <React.Fragment
+//                               key={`${zone}-${region}-${category}-${groupIndex}`}
+//                             >
+//                               <td className="border border-gray-500 px-4 py-2">
+//                                 {data.find(
+//                                   (entry) =>
+//                                     entry.zone === zone &&
+//                                     entry.region === region &&
+//                                     entry.customer_category === category &&
+//                                     entry.Product_Group_ID === groupID
+//                                 )?.SUM_revenue || "N/A"}
+//                               </td>
+//                               <td className="border border-gray-500 px-4 py-2">
+//                                 {data.find(
+//                                   (entry) =>
+//                                     entry.zone === zone &&
+//                                     entry.region === region &&
+//                                     entry.customer_category === category &&
+//                                     entry.Product_Group_ID === groupID
+//                                 )?.SUM_weight || "N/A"}
+//                               </td>
+//                             </React.Fragment>
+//                           )
+//                         )}
+//                       </React.Fragment>
+//                     ))}
+//                   </tr>
+//                 )
+//               )
+//             )}
+//           </tbody>
+//         </table>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default DynamicTable;
+// test 25 adding grand total
+
+// import React, { useState, useEffect } from "react";
+
+// const DynamicTable = () => {
+//   const [data, setData] = useState([]);
+//   const [error, setError] = useState(null);
+//   const [productGroupIDsByCategory, setProductGroupIDsByCategory] = useState(
+//     {}
+//   );
+
+//   useEffect(() => {
+//     fetchData();
+//   }, []);
+
+//   const fetchData = async () => {
+//     try {
+//       const response = await fetch(
+//         "http://localhost:3500/table/getQueryData?database=DataBase1&tables=FY20_Table1&valueColumns=revenue%2Cweight&rows=zone%2Cregion&groupByFields=customer_category%2CProduct_Group_ID",
+//         {
+//           method: "POST",
+//           headers: {
+//             "Content-Type": "application/json",
+//             Authorization:
+//               "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6Im1vaGl0MTIzIiwicm9sZXMiOlsyMDAxLDE5ODRdfSwiaWF0IjoxNzEzMTc1MzQ1LCJleHAiOjE3MTMyNzUzNDV9.vhWJ32EfSryfkAk4mZv8hH2f2DmWbaVYc_fEzlKYSsQ",
+//             Cookie:
+//               "jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJ1c2VybmFtZSI6Im1vaGl0MTIzIiwicm9sZXMiOlsyMDAxLDE5ODRdfSwiaWF0IjoxNzEzMTc1MzQ1LCJleHAiOjE3MTMyNzUzNDV9.vhWJ32EfSryfkAk4mZv8hH2f2DmWbaVYc_fEzlKYSsQ",
+//           },
+//           body: JSON.stringify({
+//             mongoId: "660bc6abb6a9151ea1faa14b",
+//           }),
+//         }
+//       );
+
+//       const result = await response.json();
+//       setData(result);
+//       setError(null);
+
+//       // Group data by customer category and product group ID to get unique product group IDs for each customer category
+//       const groupedProductGroupIDs = result.reduce((acc, curr) => {
+//         const { customer_category, Product_Group_ID } = curr;
+//         if (!acc[customer_category]) {
+//           acc[customer_category] = new Set();
+//         }
+//         acc[customer_category].add(Product_Group_ID);
+//         return acc;
+//       }, {});
+
+//       // Convert the sets of product group IDs to arrays
+//       const productGroupIDsByCategory = {};
+//       for (const category in groupedProductGroupIDs) {
+//         productGroupIDsByCategory[category] = Array.from(
+//           groupedProductGroupIDs[category]
+//         );
+//       }
+//       setProductGroupIDsByCategory(productGroupIDsByCategory);
+//     } catch (error) {
+//       console.error("Error fetching data:", error);
+//       setError("Error fetching data. Please try again later.");
+//     }
+//   };
+
+//   if (error) {
+//     return (
+//       <div className="min-h-screen flex justify-center items-center">
+//         <p className="text-red-500">{error}</p>
+//       </div>
+//     );
+//   }
+
+//   if (!Array.isArray(data) || data.length === 0) {
+//     return (
+//       <div className="min-h-screen flex justify-center items-center">
+//         <p>No data available.</p>
+//       </div>
+//     );
+//   }
+
+//   const categories = Object.keys(productGroupIDsByCategory);
+
+//   // Group data by zone and region
+//   const groupedData = data.reduce((acc, curr) => {
+//     const { zone, region, Product_Group_ID } = curr;
+//     if (!acc[zone]) {
+//       acc[zone] = {};
+//     }
+//     if (!acc[zone][region]) {
+//       acc[zone][region] = [];
+//     }
+//     if (!acc[zone][region].includes(Product_Group_ID)) {
+//       acc[zone][region].push(Product_Group_ID);
+//     }
+//     return acc;
+//   }, {});
+
+//   // Render the table
+//   return (
+//     <div className="min-h-screen">
+//       <div className="ml-5 mt-5">
+//         <h2>Dynamic Pivot Table</h2>
+//         <table className="border-collapse border border-gray-500 w-full">
+//           <thead>
+//             <tr>
+//               <th rowSpan="2" className="border border-gray-500 px-4 py-2">
+//                 Zone
+//               </th>
+//               <th rowSpan="2" className="border border-gray-500 px-4 py-2">
+//                 Region
+//               </th>
+//               {categories.map((category, index) => (
+//                 <React.Fragment key={index}>
+//                   <th
+//                     colSpan={productGroupIDsByCategory[category].length * 2}
+//                     className="border border-gray-500 px-4 py-2"
+//                   >
+//                     {category}
+//                   </th>
+//                 </React.Fragment>
+//               ))}
+//             </tr>
+//             <tr>
+//               {categories.map((category) =>
+//                 productGroupIDsByCategory[category].map((groupID, idx) => (
+//                   <React.Fragment key={idx}>
+//                     <th className="border border-gray-500 px-4 py-2">
+//                       {groupID} (revenue)
+//                     </th>
+//                     <th className="border border-gray-500 px-4 py-2">
+//                       {groupID} (weight)
+//                     </th>
+//                   </React.Fragment>
+//                 ))
+//               )}
+//             </tr>
+//           </thead>
+
+//           <tbody>
+//             {Object.entries(groupedData).map(([zone, regions], zoneIndex) =>
+//               Object.entries(regions).map(
+//                 ([region, productGroupIDs], rowIndex) => (
+//                   <tr key={`${zone}-${region}`}>
+//                     {rowIndex === 0 && (
+//                       <React.Fragment>
+//                         <td
+//                           rowSpan={Object.keys(regions).length}
+//                           className="border border-gray-500 px-4 py-2"
+//                         >
+//                           {zone}
+//                         </td>
+//                       </React.Fragment>
+//                     )}
+//                     <td className="border border-gray-500 px-4 py-2">
+//                       {region}
+//                     </td>
+//                     {categories.map((category, categoryIndex) => (
+//                       <React.Fragment
+//                         key={`${zone}-${region}-${categoryIndex}`}
+//                       >
+//                         {productGroupIDsByCategory[category].map(
+//                           (groupID, groupIndex) => {
+//                             const categoryData = data.filter(
+//                               (entry) =>
+//                                 entry.zone === zone &&
+//                                 entry.region === region &&
+//                                 entry.customer_category === category &&
+//                                 entry.Product_Group_ID === groupID
+//                             );
+//                             const totalRevenue = categoryData.reduce(
+//                               (acc, curr) => acc + curr.SUM_revenue,
+//                               0
+//                             );
+//                             const totalWeight = categoryData.reduce(
+//                               (acc, curr) => acc + curr.SUM_weight,
+//                               0
+//                             );
+//                             return (
+//                               <React.Fragment
+//                                 key={`${zone}-${region}-${category}-${groupIndex}`}
+//                               >
+//                                 <td className="border border-gray-500 px-4 py-2">
+//                                   {totalRevenue || "N/A"}
+//                                 </td>
+//                                 <td className="border border-gray-500 px-4 py-2">
+//                                   {totalWeight || "N/A"}
+//                                 </td>
+//                               </React.Fragment>
+//                             );
+//                           }
+//                         )}
+//                       </React.Fragment>
+//                     ))}
+//                   </tr>
+//                 )
+//               )
+//             )}
+//             {/* Total row for each product group ID */}
+//             <tr>
+//               <td colSpan="2" className="border border-gray-500 px-4 py-2">
+//               Grand  Total
+//               </td>
+//               {categories.map((category) =>
+//                 productGroupIDsByCategory[category].map((groupID, idx) => {
+//                   const totalRevenue = data
+//                     .filter(
+//                       (entry) =>
+//                         entry.customer_category === category &&
+//                         entry.Product_Group_ID === groupID
+//                     )
+//                     .reduce((acc, curr) => acc + curr.SUM_revenue, 0);
+//                   const totalWeight = data
+//                     .filter(
+//                       (entry) =>
+//                         entry.customer_category === category &&
+//                         entry.Product_Group_ID === groupID
+//                     )
+//                     .reduce((acc, curr) => acc + curr.SUM_weight, 0);
+//                   return (
+//                     <React.Fragment key={idx}>
+//                       <td className="border border-gray-500 px-4 py-2">
+//                         {totalRevenue}
+//                       </td>
+//                       <td className="border border-gray-500 px-4 py-2">
+//                         {totalWeight}
+//                       </td>
+//                     </React.Fragment>
+//                   );
+//                 })
+//               )}
+//             </tr>
+//           </tbody>
+//         </table>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default DynamicTable;
+
+// test 26 adding subtotatl and its added but value is wrong
 import React, { useState, useEffect } from "react";
 
 const DynamicTable = () => {
@@ -3371,7 +3811,6 @@ const DynamicTable = () => {
       );
 
       const result = await response.json();
-      console.log(result);
       setData(result);
       setError(null);
 
@@ -3431,10 +3870,6 @@ const DynamicTable = () => {
     }
     return acc;
   }, {});
-  // Calculate the maximum number of product group IDs among all categories
-  const maxProductGroupIDs = Math.max(
-    ...categories.map((category) => productGroupIDsByCategory[category].length)
-  );
 
   // Render the table
   return (
@@ -3460,6 +3895,12 @@ const DynamicTable = () => {
                   </th>
                 </React.Fragment>
               ))}
+              <th className="border border-gray-500 px-4 py-2">
+                Row Total (revenue)
+              </th>
+              <th className="border border-gray-500 px-4 py-2">
+                Row Total (weight)
+              </th>
             </tr>
             <tr>
               {categories.map((category) =>
@@ -3478,59 +3919,148 @@ const DynamicTable = () => {
           </thead>
 
           <tbody>
-            {Object.entries(groupedData).map(([zone, regions], zoneIndex) =>
-              Object.entries(regions).map(
-                ([region, productGroupIDs], rowIndex) => (
-                  <tr key={`${zone}-${region}`}>
-                    {rowIndex === 0 && (
-                      <React.Fragment>
+            {Object.entries(groupedData).map(([zone, regions], zoneIndex) => (
+              <>
+                {Object.entries(regions).map(
+                  ([region, productGroupIDs], rowIndex) => (
+                    <tr key={`${zone}-${region}`}>
+                      {rowIndex === 0 && (
                         <td
                           rowSpan={Object.keys(regions).length}
                           className="border border-gray-500 px-4 py-2"
                         >
                           {zone}
                         </td>
-                      </React.Fragment>
-                    )}
-                    <td className="border border-gray-500 px-4 py-2">
-                      {region}
-                    </td>
-                    {categories.map((category, categoryIndex) => (
-                      <React.Fragment
-                        key={`${zone}-${region}-${categoryIndex}`}
-                      >
-                        {productGroupIDsByCategory[category].map(
-                          (groupID, groupIndex) => (
-                            <React.Fragment
-                              key={`${zone}-${region}-${category}-${groupIndex}`}
-                            >
-                              <td className="border border-gray-500 px-4 py-2">
-                                {data.find(
-                                  (entry) =>
-                                    entry.zone === zone &&
-                                    entry.region === region &&
-                                    entry.customer_category === category &&
-                                    entry.Product_Group_ID === groupID
-                                )?.SUM_revenue || "N/A"}
-                              </td>
-                              <td className="border border-gray-500 px-4 py-2">
-                                {data.find(
-                                  (entry) =>
-                                    entry.zone === zone &&
-                                    entry.region === region &&
-                                    entry.customer_category === category &&
-                                    entry.Product_Group_ID === groupID
-                                )?.SUM_weight || "N/A"}
-                              </td>
-                            </React.Fragment>
-                          )
+                      )}
+                      <td className="border border-gray-500 px-4 py-2">
+                        {region}
+                      </td>
+                      {categories.map((category, categoryIndex) => (
+                        <React.Fragment
+                          key={`${zone}-${region}-${categoryIndex}`}
+                        >
+                          {productGroupIDsByCategory[category].map(
+                            (groupID, groupIndex) => {
+                              const categoryData = data.filter(
+                                (entry) =>
+                                  entry.zone === zone &&
+                                  entry.region === region &&
+                                  entry.customer_category === category &&
+                                  entry.Product_Group_ID === groupID
+                              );
+                              const totalRevenue = categoryData.reduce(
+                                (acc, curr) => acc + curr.SUM_revenue,
+                                0
+                              );
+                              const totalWeight = categoryData.reduce(
+                                (acc, curr) => acc + curr.SUM_weight,
+                                0
+                              );
+                              return (
+                                <React.Fragment
+                                  key={`${zone}-${region}-${category}-${groupIndex}`}
+                                >
+                                  <td className="border border-gray-500 px-4 py-2">
+                                    {totalRevenue || "N/A"}
+                                  </td>
+                                  <td className="border border-gray-500 px-4 py-2">
+                                    {totalWeight || "N/A"}
+                                  </td>
+                                </React.Fragment>
+                              );
+                            }
+                          )}
+                        </React.Fragment>
+                      ))}
+                      <td className="border border-gray-500 px-4 py-2">
+                        {Object.values(productGroupIDs).reduce(
+                          (acc, curr) => acc + curr.SUM_revenue,
+                          0
                         )}
-                      </React.Fragment>
-                    ))}
-                  </tr>
-                )
-              )
-            )}
+                      </td>
+                      <td className="border border-gray-500 px-4 py-2">
+                        {Object.values(productGroupIDs).reduce(
+                          (acc, curr) => acc + curr.SUM_weight,
+                          0
+                        )}
+                      </td>
+                    </tr>
+                  )
+                )}
+                {/* Subtotals for each zone */}
+                <tr key={`subtotal-${zone}`}>
+                  <td colSpan={2} className="border border-gray-500 px-4 py-2">
+                    Subtotal
+                  </td>
+                  {categories.map((category) =>
+                    productGroupIDsByCategory[category].map((groupID, idx) => {
+                      const zoneData = data.filter(
+                        (entry) =>
+                          entry.zone === zone &&
+                          entry.customer_category === category &&
+                          entry.Product_Group_ID === groupID
+                      );
+                      const subtotalRevenue = zoneData.reduce(
+                        (acc, curr) => acc + curr.SUM_revenue,
+                        0
+                      );
+                      const subtotalWeight = zoneData.reduce(
+                        (acc, curr) => acc + curr.SUM_weight,
+                        0
+                      );
+                      return (
+                        <React.Fragment key={idx}>
+                          <td className="border border-gray-500 px-4 py-2">
+                            {subtotalRevenue}
+                          </td>
+                          <td className="border border-gray-500 px-4 py-2">
+                            {subtotalWeight}
+                          </td>
+                        </React.Fragment>
+                      );
+                    })
+                  )}
+                  <td className="border border-gray-500 px-4 py-2"></td>
+                  <td className="border border-gray-500 px-4 py-2"></td>
+                </tr>
+              </>
+            ))}
+            {/* Grand totals */}
+            <tr>
+              <td colSpan={2} className="border border-gray-500 px-4 py-2">
+                Grand Total
+              </td>
+              {categories.map((category) =>
+                productGroupIDsByCategory[category].map((groupID, idx) => {
+                  const totalRevenue = data
+                    .filter(
+                      (entry) =>
+                        entry.customer_category === category &&
+                        entry.Product_Group_ID === groupID
+                    )
+                    .reduce((acc, curr) => acc + curr.SUM_revenue, 0);
+                  const totalWeight = data
+                    .filter(
+                      (entry) =>
+                        entry.customer_category === category &&
+                        entry.Product_Group_ID === groupID
+                    )
+                    .reduce((acc, curr) => acc + curr.SUM_weight, 0);
+                  return (
+                    <React.Fragment key={idx}>
+                      <td className="border border-gray-500 px-4 py-2">
+                        {totalRevenue}
+                      </td>
+                      <td className="border border-gray-500 px-4 py-2">
+                        {totalWeight}
+                      </td>
+                    </React.Fragment>
+                  );
+                })
+              )}
+              <td className="border border-gray-500 px-4 py-2"></td>
+              <td className="border border-gray-500 px-4 py-2"></td>
+            </tr>
           </tbody>
         </table>
       </div>
