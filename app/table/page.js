@@ -4214,84 +4214,83 @@ const DynamicTable = () => {
           <tbody>
             {Object.entries(groupedData).map(([zone, regions], zoneIndex) => (
               <>
-                {Object.entries(regions).map(([region, productGroupIDs], rowIndex) => (
-                  <tr key={`${zone}-${region}`}>
-                    {rowIndex === 0 && (
-                      <td
-                        rowSpan={Object.keys(regions).length}
-                        className="border border-gray-500 px-4 py-2"
-                      >
-                        {zone}
-                      </td>
-                    )}
-                    <td className="border border-gray-500 px-4 py-2">
-                      {region}
-                    </td>
-                    {categories.map((category, categoryIndex) => (
-                      <React.Fragment key={`${zone}-${region}-${categoryIndex}`}>
-                        {productGroupIDsByCategory[category].map((groupID, groupIndex) => {
-                          const categoryData = data.filter(
-                            (entry) =>
-                              entry.zone === zone &&
-                              entry.region === region &&
-                              entry.customer_category === category &&
-                              entry.Product_Group_ID === groupID
-                          );
-                          const totalRevenue = categoryData.reduce(
-                            (acc, curr) => acc + curr.SUM_revenue,
-                            0
-                          );
-                          const totalWeight = categoryData.reduce(
-                            (acc, curr) => acc + curr.SUM_weight,
-                            0
-                          );
-                          return (
-                            <React.Fragment
-                              key={`${zone}-${region}-${category}-${groupIndex}`}
-                            >
-                              <td className="border border-gray-500 px-4 py-2">
-                                {totalRevenue || "N/A"}
-                              </td>
-                              <td className="border border-gray-500 px-4 py-2">
-                                {totalWeight || "N/A"}
-                              </td>
-                            </React.Fragment>
-                          );
-                        })}
-                      </React.Fragment>
-                    ))}
-                    <td className="border border-gray-500 px-4 py-2">
-                      {productGroupIDs.reduce(
-                        (acc, groupID) =>
-                          acc +
-                          data
-                            .filter(
-                              (entry) =>
-                                entry.zone === zone &&
-                                entry.region === region &&
-                                productGroupIDs.includes(entry.Product_Group_ID)
-                            )
-                            .reduce((acc, curr) => acc + curr.SUM_revenue, 0),
-                        0
-                      )}
-                    </td>
-                    <td className="border border-gray-500 px-4 py-2">
-                      {productGroupIDs.reduce(
-                        (acc, groupID) =>
-                          acc +
-                          data
-                            .filter(
-                              (entry) =>
-                                entry.zone === zone &&
-                                entry.region === region &&
-                                productGroupIDs.includes(entry.Product_Group_ID)
-                            )
-                            .reduce((acc, curr) => acc + curr.SUM_weight, 0),
-                        0
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {Object.entries(regions).map(
+                  ([region, productGroupIDs], rowIndex) => {
+                    // Calculate row totals
+                    const regionData = data.filter(
+                      (entry) => entry.zone === zone && entry.region === region
+                    );
+                    const rowTotalRevenue = regionData.reduce(
+                      (acc, curr) => acc + curr.SUM_revenue,
+                      0
+                    );
+                    const rowTotalWeight = regionData.reduce(
+                      (acc, curr) => acc + curr.SUM_weight,
+                      0
+                    );
+
+                    return (
+                      <tr key={`${zone}-${region}`}>
+                        {rowIndex === 0 && (
+                          <td
+                            rowSpan={Object.keys(regions).length}
+                            className="border border-gray-500 px-4 py-2"
+                          >
+                            {zone}
+                          </td>
+                        )}
+                        <td className="border border-gray-500 px-4 py-2">
+                          {region}
+                        </td>
+                        {/* Columns for each category and groupID */}
+                        {categories.map((category, categoryIndex) => (
+                          <React.Fragment
+                            key={`${zone}-${region}-${categoryIndex}`}
+                          >
+                            {productGroupIDsByCategory[category].map(
+                              (groupID, groupIndex) => {
+                                const categoryData = data.filter(
+                                  (entry) =>
+                                    entry.zone === zone &&
+                                    entry.region === region &&
+                                    entry.customer_category === category &&
+                                    entry.Product_Group_ID === groupID
+                                );
+                                const totalRevenue = categoryData.reduce(
+                                  (acc, curr) => acc + curr.SUM_revenue,
+                                  0
+                                );
+                                const totalWeight = categoryData.reduce(
+                                  (acc, curr) => acc + curr.SUM_weight,
+                                  0
+                                );
+                                return (
+                                  <React.Fragment
+                                    key={`${zone}-${region}-${category}-${groupIndex}`}
+                                  >
+                                    <td className="border border-gray-500 px-4 py-2">
+                                      {totalRevenue || ""}
+                                    </td>
+                                    <td className="border border-gray-500 px-4 py-2">
+                                      {totalWeight || ""}
+                                    </td>
+                                  </React.Fragment>
+                                );
+                              }
+                            )}
+                          </React.Fragment>
+                        ))}
+                        {/* Print row totals */}
+                        <td className="border border-gray-500 px-4 py-2">
+                          {rowTotalRevenue}
+                        </td>
+                        <td className="border border-gray-500 px-4 py-2">
+                          {rowTotalWeight}
+                        </td>
+                      </tr>
+                    );
+                  }
+                )}
                 {/* Subtotals for each zone */}
                 <tr key={`subtotal-${zone}`}>
                   <td colSpan={2} className="border border-gray-500 px-4 py-2">
@@ -4330,12 +4329,12 @@ const DynamicTable = () => {
                 </tr>
               </>
             ))}
-          {/* Grand totals */}
-             <tr>
-               <td colSpan={2} className="border border-gray-500 px-4 py-2">
-                 Grand Total
-               </td>
-               {categories.map((category) =>
+            {/* Grand totals */}
+            <tr>
+              <td colSpan={2} className="border border-gray-500 px-4 py-2">
+                Grand Total
+              </td>
+              {categories.map((category) =>
                 productGroupIDsByCategory[category].map((groupID, idx) => {
                   const totalRevenue = data
                     .filter(

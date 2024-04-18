@@ -1,0 +1,30 @@
+{categories.map((category) =>
+                        productGroupIDsByCategory[category].map(
+                          (groupID, idx) => {
+                            const regionData = data.filter(
+                              (entry) =>
+                                entry.zone === zone && entry.region === region
+                              // entry.customer_category === category
+                              // entry.Product_Group_ID === groupID
+                            );
+                            const rowtotalRevenue = regionData.reduce(
+                              (acc, curr) => acc + curr.SUM_revenue,
+                              0
+                            );
+                            const rowtotalWeight = regionData.reduce(
+                              (acc, curr) => acc + curr.SUM_weight,
+                              0
+                            );
+                            return (
+                              <React.Fragment key={idx}>
+                                <td className="border border-gray-500 px-4 py-2">
+                                  {rowtotalRevenue}
+                                </td>
+                                <td className="border border-gray-500 px-4 py-2">
+                                  {rowtotalWeight}
+                                </td>
+                              </React.Fragment>
+                            );
+                          }
+                        )
+                      )}
