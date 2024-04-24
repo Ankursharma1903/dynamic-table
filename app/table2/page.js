@@ -1,27 +1,25 @@
 "use client";
-// import React, { useState, useEffect } from "react";
-// import "./app.css";
-
-// import {
-//   PivotViewComponent,
-//   IDataOptions,
-//   Inject,
-//   FieldList,
-//   CalculatedField,
-//   Toolbar,
-//   PDFExport,
-//   ExcelExport,
-//   ConditionalFormatting,
-//   SaveReportArgs,
-//   FetchReportArgs,
-//   LoadReportArgs,
-//   RemoveReportArgs,
-//   RenameReportArgs,
-//   ToolbarArgs,
-//   NumberFormatting,
-// } from "@syncfusion/ej2-react-pivotview";
-// import { pivotData } from "./data";
-// import { saveAs } from "file-saver";
+import React, { useState, useEffect, useRef } from "react";
+import "./app.css";
+import {
+  PivotViewComponent,
+  Inject,
+  FieldList,
+  CalculatedField,
+  Toolbar,
+  PDFExport,
+  ExcelExport,
+  ConditionalFormatting,
+  SaveReportArgs,
+  FetchReportArgs,
+  LoadReportArgs,
+  RemoveReportArgs,
+  RenameReportArgs,
+  ToolbarArgs,
+  NumberFormatting,
+} from "@syncfusion/ej2-react-pivotview";
+import { pivotData } from "./data";
+import { saveAs } from "file-saver";
 
 // function Table() {
 //   const [data, setData] = useState([]);
@@ -337,27 +335,6 @@
 // export default Table;
 
 // best till now with all the functionalities
-import React, { useState, useEffect, useRef } from "react";
-import "./app.css";
-import {
-  PivotViewComponent,
-  Inject,
-  FieldList,
-  CalculatedField,
-  Toolbar,
-  PDFExport,
-  ExcelExport,
-  ConditionalFormatting,
-  SaveReportArgs,
-  FetchReportArgs,
-  LoadReportArgs,
-  RemoveReportArgs,
-  RenameReportArgs,
-  ToolbarArgs,
-  NumberFormatting,
-} from "@syncfusion/ej2-react-pivotview";
-import { pivotData } from "./data";
-import { saveAs } from "file-saver";
 
 function Table() {
   const [data, setData] = useState([]);
@@ -628,6 +605,13 @@ function Table() {
         chartSettings={{
           title: "Sales Analysis",
           load: chartOnLoad.bind(this),
+        }}
+        gridSettings={{
+          rowHeight: 50,
+          columnWidth: 100,
+          allowAutoResizing: true,
+          allowResizing: true,
+          allowReordering: true,
         }}
       >
         <Inject
