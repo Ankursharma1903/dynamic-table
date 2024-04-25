@@ -336,9 +336,315 @@ import { saveAs } from "file-saver";
 
 // best till now with all the functionalities
 
+// function Table() {
+//   const [data, setData] = useState([]);
+//   const [error, setError] = useState(null);
+//   const pivotObjRef = useRef(null); // Create a reference to PivotViewComponent
+
+//   useEffect(() => {
+//     fetchData();
+//   }, []);
+
+//   const fetchData = async () => {
+//     try {
+//       const response = await fetch(
+//         "http://localhost:3500/table/getQueryData?database=DataBase1&tables=FY20_Table1&valueColumns=revenue%2Cweight&rows=zone%2Cregion&groupByFields=customer_category%2CProduct_Group_ID",
+//         {
+//           method: "POST",
+//           headers: {
+//             "Content-Type": "application/json",
+//             Authorization: "Bearer <your-access-token>",
+//           },
+//           body: JSON.stringify({
+//             mongoId: "660bc6abb6a9151ea1faa14b",
+//           }),
+//         }
+//       );
+
+//       const result = await response.json();
+//       setData(result);
+//       console.log(result);
+//       setError(null);
+//     } catch (error) {
+//       console.error("Error fetching data:", error);
+//       setError("Error fetching data. Please try again later.");
+//     }
+//   };
+
+//   const dataSourceSettings = {
+//     enableSorting: true,
+//     rows: [
+//       { name: "zone", showSubTotals: true, expanded: true },
+//       { name: "region", showSubTotals: true, expanded: true },
+//     ],
+//     valueSortSettings: { headerDelimiter: " - " },
+//     values: [
+//       { name: "SUM_revenue", caption: "Total Revenue" },
+//       { name: "SUM_weight", caption: "Total Weight" },
+//       {
+//         name: "total",
+//         caption: "total units",
+//         type: "CalculatedField", // for now not working
+//       },
+//     ],
+//     dataSource: data,
+//     columns: [
+//       { name: "customer_category", showSubTotals: true, expanded: true },
+//       { name: "Product_Group_ID", showSubTotals: true, expanded: true },
+//     ],
+//     filters: [{ name: "Zone" }],
+//     CalculatedFieldSettings: [
+//       {
+//         name: "total",
+//         formula: '"Sum(SUM_revenue)"+"Sum(SUM_weight)"',
+//       },
+//     ], //this specify for total and formula by which we want that calculation
+//     ConditionalFormatSettings: [
+//       {
+//         measure: "SUM_revenue", // is datasource field
+//         conditions: "Between",
+//         value1: 1000,
+//         value2: 20000,
+//         style: {
+//           backgroundColor: "#80cbc4",
+//           color: "black",
+//           fontFamily: "Tahoma",
+//           fontSize: "12px",
+//         },
+//       },
+//       {
+//         conditions: "LessThan",
+//         value1: 1000,
+//         style: {
+//           backgroundColor: "#OOFFFF",
+//           color: "black",
+//           fontFamily: "Tahoma",
+//           fontSize: "12px",
+//         },
+//       },
+//     ],
+//   };
+//   let toolbarOptions = [
+//     "New",
+//     "Save",
+//     "SaveAs",
+//     "Rename",
+//     "Remove",
+//     "Load",
+//     "Grid",
+//     "Chart",
+//     "Export",
+//     "SubTotal",
+//     "GrandTotal",
+//     "Formatting",
+//     "FieldList",
+//   ];
+//   const newReport = () => {
+//     if (pivotObjRef.current) {
+//       // Check if pivotObjRef is initialized
+//       pivotObjRef.current.setProperties({
+//         dataSourceSettings: {
+//           columns: [],
+//           rows: [],
+//           values: [],
+//           filters: [],
+//           ConditionalFormatSettings: [],
+//         },
+//       });
+//     }
+//   };
+
+//   const downloadCSV = () => {
+//     const csvData = convertToCSV(data);
+//     const blob = new Blob([csvData], { type: "text/csv;charset=utf-8" });
+//     saveAs(blob, "pivot_data.csv");
+//   };
+
+//   const convertToCSV = (data) => {
+//     const header = Object.keys(data[0]).join(",");
+//     const rows = data.map((obj) => Object.values(obj).join(","));
+//     return [header, ...rows].join("\n");
+//   };
+
+//   function saveReport(args) {
+//     let reports = [];
+//     let isSaved = false;
+//     if (localStorage.pivotviewReports && localStorage.pivotviewReports !== "") {
+//       reports = JSON.parse(localStorage.pivotviewReports);
+//     }
+//     if (args.report && args.reportName && args.reportName !== "") {
+//       reports.map(function (item) {
+//         if (args.reportName === item.reportName) {
+//           item.report = args.report;
+//           isSaved = true;
+//         }
+//       });
+//       if (!isSaved) {
+//         reports.push(args);
+//       }
+//       localStorage.pivotviewReports = JSON.stringify(reports);
+//     }
+//   }
+//   function fetchReport(args) {
+//     let reportCollection = [];
+//     let reeportList = [];
+//     if (localStorage.pivotviewReports && localStorage.pivotviewReports !== "") {
+//       reportCollection = JSON.parse(localStorage.pivotviewReports);
+//     }
+//     reportCollection.map(function (item) {
+//       reeportList.push(item.reportName);
+//     });
+//     args.reportName = reeportList;
+//   }
+//   function loadReport(args) {
+//     if (pivotObjRef.current) {
+//       let reportCollection = [];
+//       if (
+//         localStorage.pivotviewReports &&
+//         localStorage.pivotviewReports !== ""
+//       ) {
+//         reportCollection = JSON.parse(localStorage.pivotviewReports);
+//       }
+//       reportCollection.map(function (item) {
+//         if (args.reportName === item.reportName) {
+//           args.report = item.report;
+//         }
+//       });
+//       if (args.report) {
+//         pivotObjRef.current.dataSourceSettings = JSON.parse(
+//           args.report
+//         ).dataSourceSettings;
+//       }
+//     } else {
+//       console.error("PivotViewComponent is not yet rendered or is unmounted.");
+//     }
+//   }
+
+//   function removeReport(args) {
+//     let reportCollection = [];
+//     if (localStorage.pivotviewReports && localStorage.pivotviewReports !== "") {
+//       reportCollection = JSON.parse(localStorage.pivotviewReports);
+//     }
+//     for (let i = 0; i < reportCollection.length; i++) {
+//       if (reportCollection[i].reportName === args.reportName) {
+//         reportCollection.splice(i, 1);
+//       }
+//     }
+//     if (localStorage.pivotviewReports && localStorage.pivotviewReports !== "") {
+//       localStorage.pivotviewReports = JSON.stringify(reportCollection);
+//     }
+//   }
+//   function renameReport(args) {
+//     let reportsCollection = [];
+//     if (localStorage.pivotviewReports && localStorage.pivotviewReports !== "") {
+//       reportsCollection = JSON.parse(localStorage.pivotviewReports);
+//     }
+//     if (args.isReportExists) {
+//       for (let i = 0; i < reportsCollection.length; i++) {
+//         if (reportsCollection[i].reportName === args.rename) {
+//           reportsCollection.splice(i, 1);
+//         }
+//       }
+//     }
+//     reportsCollection.map(function (item) {
+//       if (args.reportName === item.reportName) {
+//         item.reportName = args.rename;
+//       }
+//     });
+//     if (localStorage.pivotviewReports && localStorage.pivotviewReports !== "") {
+//       localStorage.pivotviewReports = JSON.stringify(reportsCollection);
+//     }
+//   }
+
+//   function beforeToolbarRender(args) {
+//     args.customToolbar.splice(6, 0, {
+//       type: "Separator",
+//     });
+//     args.customToolbar.splice(9, 0, {
+//       type: "Separator",
+//     });
+//   }
+//   function chartOnLoad(args) {
+//     let selectedTheme = location.hash.split("/")[1];
+//     selectedTheme = selectedTheme ? selectedTheme : "Material";
+//     args.chart.theme = (
+//       selectedTheme.charAt(0).toUpperCase() + selectedTheme.slice(1)
+//     ).replace(/-dark/i, "Dark");
+//   }
+//   return (
+//     <div className="App mt-20">
+//       <button onClick={downloadCSV}>Download CSV</button>
+//       <PivotViewComponent
+//         id="PivotView"
+//         dataSourceSettings={dataSourceSettings}
+//         width={"100%"}
+//         height={"500"}
+//         showFieldList={true}
+//         allowCalculatedField={true}
+//         editSettings={{
+//           mode: "Batch",
+//           allowInlineEditing: true,
+//           allowCommandColumns: true,
+//           allowEditing: true,
+//           allowAdding: true,
+//           allowDeleting: true,
+//         }}
+//         allowConditionalFormatting={true}
+//         showToolbar={true}
+//         // toolbar={["ConditionalFormatting"]}
+//         toolbar={toolbarOptions}
+//         allowExcelExport={true}
+//         allowNumberFormatting={true}
+//         allowPdfExport={true}
+//         newReport={newReport.bind(this)}
+//         renameReport={renameReport.bind(this)}
+//         removeReport={removeReport.bind(this)}
+//         loadReport={loadReport.bind(this)}
+//         fetchReport={fetchReport.bind(this)}
+//         saveReport={saveReport.bind(this)}
+//         toolbarRender={beforeToolbarRender.bind(this)}
+//         chartSettings={{
+//           title: "Sales Analysis",
+//           load: chartOnLoad.bind(this),
+//         }}
+//         gridSettings={{
+//           rowHeight: 50,
+//           columnWidth: 100,
+//           allowAutoResizing: true,
+//           allowResizing: true,
+//           allowReordering: true,
+//         }}
+//       >
+//         <Inject
+//           services={[
+//             FieldList,
+//             CalculatedField,
+//             ConditionalFormatting,
+//             Toolbar,
+//             PDFExport,
+//             ExcelExport,
+//             NumberFormatting,
+//           ]}
+//         ></Inject>
+//       </PivotViewComponent>
+//     </div>
+//   );
+// }
+
+// export default Table;
+
+// trial 3
+
 function Table() {
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedColumns, setSelectedColumns] = useState([]);
+  const [selectedValues, setSelectedValues] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState([]);
+  const [selectedCalculatedFields, setSelectedCalculatedFields] = useState([]);
+  const [dataSourceSettings, setDataSourceSettings] = useState(null); // Initialize as null
+  const [settingsFinalized, setSettingsFinalized] = useState(false); // Flag to track finalization
   const pivotObjRef = useRef(null); // Create a reference to PivotViewComponent
 
   useEffect(() => {
@@ -370,59 +676,71 @@ function Table() {
     }
   };
 
-  const dataSourceSettings = {
-    enableSorting: true,
-    rows: [
-      { name: "zone", showSubTotals: true, expanded: true },
-      { name: "region", showSubTotals: true, expanded: true },
-    ],
-    valueSortSettings: { headerDelimiter: " - " },
-    values: [
-      { name: "SUM_revenue", caption: "Total Revenue" },
-      { name: "SUM_weight", caption: "Total Weight" },
-      {
-        name: "total",
-        caption: "total units",
-        type: "CalculatedField", // for now not working
-      },
-    ],
-    dataSource: data,
-    columns: [
-      { name: "customer_category", showSubTotals: true, expanded: true },
-      { name: "Product_Group_ID", showSubTotals: true, expanded: true },
-    ],
-    filters: [{ name: "Zone" }],
-    CalculatedFieldSettings: [
-      {
-        name: "total",
-        formula: '"Sum(SUM_revenue)"+"Sum(SUM_weight)"',
-      },
-    ], //this specify for total and formula by which we want that calculation
-    ConditionalFormatSettings: [
-      {
-        measure: "SUM_revenue", // is datasource field
-        conditions: "Between",
-        value1: 1000,
-        value2: 20000,
-        style: {
-          backgroundColor: "#80cbc4",
-          color: "black",
-          fontFamily: "Tahoma",
-          fontSize: "12px",
-        },
-      },
-      {
-        conditions: "LessThan",
-        value1: 1000,
-        style: {
-          backgroundColor: "#OOFFFF",
-          color: "black",
-          fontFamily: "Tahoma",
-          fontSize: "12px",
-        },
-      },
-    ],
+  const handleRowToggle = (rowName) => {
+    setSelectedRows((prevSelectedRows) =>
+      prevSelectedRows.includes(rowName)
+        ? prevSelectedRows.filter((row) => row !== rowName)
+        : [...prevSelectedRows, rowName]
+    );
   };
+
+  const handleColumnToggle = (columnName) => {
+    setSelectedColumns((prevSelectedColumns) =>
+      prevSelectedColumns.includes(columnName)
+        ? prevSelectedColumns.filter((column) => column !== columnName)
+        : [...prevSelectedColumns, columnName]
+    );
+  };
+  const handleValueToggle = (valueName) => {
+    setSelectedValues((prevSelectedValues) =>
+      prevSelectedValues.includes(valueName)
+        ? prevSelectedValues.filter((value) => value !== valueName)
+        : [...prevSelectedValues, valueName]
+    );
+  };
+
+  const handleFilterToggle = (filterName) => {
+    setSelectedFilters((prevSelectedFilters) =>
+      prevSelectedFilters.includes(filterName)
+        ? prevSelectedFilters.filter((filter) => filter !== filterName)
+        : [...prevSelectedFilters, filterName]
+    );
+  };
+
+  const handleCalculatedFieldToggle = (fieldName) => {
+    setSelectedCalculatedFields((prevSelectedCalculatedFields) =>
+      prevSelectedCalculatedFields.includes(fieldName)
+        ? prevSelectedCalculatedFields.filter((field) => field !== fieldName)
+        : [...prevSelectedCalculatedFields, fieldName]
+    );
+  };
+  const handleApplySettings = () => {
+    const updatedDataSourceSettings = {
+      enableSorting: true,
+      rows: selectedRows.map((row) => ({
+        name: row,
+        showSubTotals: true,
+        expanded: true,
+      })),
+      valueSortSettings: { headerDelimiter: " - " },
+      values: selectedValues.map((value) => ({
+        name: value,
+        caption: value,
+      })),
+      dataSource: data,
+      columns: selectedColumns.map((column) => ({
+        name: column,
+        showSubTotals: true,
+        expanded: true,
+      })),
+      filters: selectedFilters.map((filter) => ({
+        name: filter,
+      })),
+    };
+    setDataSourceSettings(updatedDataSourceSettings);
+    setSettingsFinalized(true);
+  };
+
   let toolbarOptions = [
     "New",
     "Save",
@@ -570,62 +888,162 @@ function Table() {
       selectedTheme.charAt(0).toUpperCase() + selectedTheme.slice(1)
     ).replace(/-dark/i, "Dark");
   }
+
+  const renderRowSelection = () => {
+    return (
+      <div>
+        <label>Select rows:</label>
+        <ul>
+          {Object.keys(data[0] || {}).map((rowName) => (
+            <li key={rowName}>
+              <input
+                type="checkbox"
+                value={rowName}
+                checked={selectedRows.includes(rowName)}
+                onChange={() => handleRowToggle(rowName)}
+              />
+              {rowName}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
+  const renderColumnSelection = () => {
+    return (
+      <div>
+        <label>Select columns:</label>
+        <ul>
+          {Object.keys(data[0] || {}).map((columnName) => (
+            <li key={columnName}>
+              <input
+                type="checkbox"
+                value={columnName}
+                checked={selectedColumns.includes(columnName)}
+                onChange={() => handleColumnToggle(columnName)}
+              />
+              {columnName}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+  const renderValueSelection = () => {
+    return (
+      <div>
+        <label>Select values:</label>
+        <ul>
+          {Object.keys(data[0] || {}).map((valueName) => (
+            <li key={valueName}>
+              <input
+                type="checkbox"
+                value={valueName}
+                checked={selectedValues.includes(valueName)}
+                onChange={() => handleValueToggle(valueName)}
+              />
+              {valueName}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
+  const renderFilterSelection = () => {
+    return (
+      <div>
+        <label>Select filters:</label>
+        <ul>
+          {Object.keys(data[0] || {}).map((filterName) => (
+            <li key={filterName}>
+              <input
+                type="checkbox"
+                value={filterName}
+                checked={selectedFilters.includes(filterName)}
+                onChange={() => handleFilterToggle(filterName)}
+              />
+              {filterName}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
+  const renderTable = () => {
+    if (settingsFinalized) {
+      return (
+        <PivotViewComponent
+          id="PivotView"
+          dataSourceSettings={dataSourceSettings}
+          width={"100%"}
+          height={"500"}
+          showFieldList={true}
+          allowCalculatedField={true}
+          editSettings={{
+            mode: "Batch",
+            allowInlineEditing: true,
+            allowCommandColumns: true,
+            allowEditing: true,
+            allowAdding: true,
+            allowDeleting: true,
+          }}
+          allowConditionalFormatting={true}
+          showToolbar={true}
+          toolbar={toolbarOptions}
+          allowExcelExport={true}
+          allowNumberFormatting={true}
+          allowPdfExport={true}
+          newReport={newReport.bind(this)}
+          renameReport={renameReport.bind(this)}
+          removeReport={removeReport.bind(this)}
+          loadReport={loadReport.bind(this)}
+          fetchReport={fetchReport.bind(this)}
+          saveReport={saveReport.bind(this)}
+          toolbarRender={beforeToolbarRender.bind(this)}
+          chartSettings={{
+            title: "Sales Analysis",
+            load: chartOnLoad.bind(this),
+          }}
+          gridSettings={{
+            rowHeight: 50,
+            columnWidth: 100,
+            allowAutoResizing: true,
+            allowResizing: true,
+            allowReordering: true,
+          }}
+        >
+          <Inject
+            services={[
+              FieldList,
+              CalculatedField,
+              ConditionalFormatting,
+              Toolbar,
+              PDFExport,
+              ExcelExport,
+              NumberFormatting,
+            ]}
+          ></Inject>
+        </PivotViewComponent>
+      );
+    } else {
+      return null;
+    }
+  };
+
   return (
     <div className="App mt-20">
-      <button onClick={downloadCSV}>Download CSV</button>
-      <PivotViewComponent
-        id="PivotView"
-        dataSourceSettings={dataSourceSettings}
-        width={"100%"}
-        height={"500"}
-        showFieldList={true}
-        allowCalculatedField={true}
-        editSettings={{
-          mode: "Batch",
-          allowInlineEditing: true,
-          allowCommandColumns: true,
-          allowEditing: true,
-          allowAdding: true,
-          allowDeleting: true,
-        }}
-        allowConditionalFormatting={true}
-        showToolbar={true}
-        // toolbar={["ConditionalFormatting"]}
-        toolbar={toolbarOptions}
-        allowExcelExport={true}
-        allowNumberFormatting={true}
-        allowPdfExport={true}
-        newReport={newReport.bind(this)}
-        renameReport={renameReport.bind(this)}
-        removeReport={removeReport.bind(this)}
-        loadReport={loadReport.bind(this)}
-        fetchReport={fetchReport.bind(this)}
-        saveReport={saveReport.bind(this)}
-        toolbarRender={beforeToolbarRender.bind(this)}
-        chartSettings={{
-          title: "Sales Analysis",
-          load: chartOnLoad.bind(this),
-        }}
-        gridSettings={{
-          rowHeight: 50,
-          columnWidth: 100,
-          allowAutoResizing: true,
-          allowResizing: true,
-          allowReordering: true,
-        }}
-      >
-        <Inject
-          services={[
-            FieldList,
-            CalculatedField,
-            ConditionalFormatting,
-            Toolbar,
-            PDFExport,
-            ExcelExport,
-            NumberFormatting,
-          ]}
-        ></Inject>
-      </PivotViewComponent>
+      <div className="h-full">
+        {renderRowSelection()}
+        {renderColumnSelection()}
+        {renderValueSelection()}
+        {renderFilterSelection()}
+        <button onClick={handleApplySettings}>Apply Settings</button>
+        <button onClick={downloadCSV}>Download CSV</button>
+        {renderTable()}
+      </div>
     </div>
   );
 }
